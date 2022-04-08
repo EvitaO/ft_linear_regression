@@ -2,7 +2,7 @@
 
 from re import X
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 def readfile():
 	file = open("data.csv")
@@ -36,6 +36,11 @@ def	main():
 		print (i)
 	plt.scatter(km, price)
 	plt.show()
+
+	# formula found using excel
+	# y = -0.0214 * x + 8500
+	# x = np.array(range(300000))
+
 	# theta0, theta1 = calculateRegressionLine(x, y)
 	# print("theta0 = " + str(theta0) + "	theta1 = " + str(theta1))
 
