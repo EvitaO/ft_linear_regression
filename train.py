@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from re import X
+from re import A, X
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -32,18 +32,30 @@ def	normalize(x, y):
 def estimatePrice(mileage):
 	return theta0 + (theta1 * mileage)
 
-def	calculateTheta(km, price):
-	tmp = 0
+def calculate(km, price):
+	tmp0 = 0
 	tmp1 = 0
 	global theta0
 	global theta1
+	for i in range(300000):
+		tmp0, tmp1 = calculateTheta(km, price)
+		theta0 -= tmp0
+		theta1 -= tmp1
+
+def	calculateTheta(km, price):
+	tmp = 0
+	tmp1 = 0
+	t0 = 0
+	t1 = 0
 
 	for i,j in zip(km, price):
 		tmp = (estimatePrice(i) - j)
 		tmp1 = ((estimatePrice(i) - j) * i)
-		theta0 = theta0 - learningRate * (tmp/len(km))
-		theta1 = theta1 - learningRate * (tmp1/len(price))
-	return theta0, theta1
+		t0 += tmp
+		t1 += tmp1
+	t0 = learningRate * t0/len(km)
+	t1 = learningRate * t1/len(price)
+	return t0, t1
 
 def	main():
 	x,y = readfile()
@@ -57,15 +69,24 @@ def	main():
 	# plt.scatter(km, price)
 	# plt.show()
 
-	theta0, theta1 = calculateTheta(km, price)
+	calculate(km, price)
+
+	global theta0
+	global theta1
+
 	print(theta0)
 	print(theta1)
-	# formula found using excel
-	# y = -0.0214 * x + 8500
-	# x = np.array(range(300000))
 
-	# theta0, theta1 = calculateRegressionLine(x, y)
-	# print("theta0 = " + str(theta0) + "	theta1 = " + str(theta1))
+	theta0 = theta0 * max(y)
+	theta1 = (y[0] - theta0) / x[0]
+	
+	print(theta0)
+	print(theta1)
+
+	x = np.array(range(300000))
+	y = theta1 * x + theta0
+	plt.plot(x, y)
+	plt.show()
 
 if __name__ == "__main__":
 	main()
