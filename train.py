@@ -1,95 +1,12 @@
 #!/usr/bin/python
 
 import matplotlib.pyplot as plt
-import numpy as np
-import math
 import sys
+import numpy as np
 
+from training_classes import *
 
 options = 0
-learningRate = 0
-
-def readfile():
-	file = open("data.csv")
-	next(file)
-	x = []
-	y = []
-	for line in file:
-		xy = line.split(',')
-		x.append(int(xy[0]))
-		y.append(int(xy[1]))
-	file.close()
-	return x,y
-
-def calculateNorm(value, dataset):
-	return (value - min(dataset))/(max(dataset)-min(dataset))
-
-def	normalize(x, y):
-	normalized = []
-	for i,j in zip(x,y):
-		normalized.append([calculateNorm(float(i), x), calculateNorm(float(j), y)])
-	return normalized
-
-def splitNormalize(data):
-	price = []
-	km = []
-	for i in data:
-		km.append(i[0])
-		price.append(i[1])
-	return km, price
-
-def calculateLearningRate(km, price):
-	n = len(km)
-	x = y = y2 = x2 = xy = 0
-	for i, j in zip(km, price):
-		x += i
-		y += j
-		xy += (i*j)
-		x2 += (i*i)
-		y2 += (j*j)
-	global learningRate
-	learningRate = (n*xy - (x*y)) / math.sqrt((n*x2 - x*x) * (n*y2 - y*y))
-	learningRate = learningRate * -1
-
-
-def estimatePrice(mileage, theta0, theta1):
-	return theta0 + (theta1 * mileage)
-
-def calculate(km, price):
-	tmp0 = 0
-	tmp1 = 0
-	theta0 = 0
-	theta1 = 0
-	for i in range(1000):
-		tmp0, tmp1 = calculateTheta(km, price, theta0, theta1)
-		theta0 -= tmp0
-		theta1 -= tmp1
-	return theta0, theta1
-
-def	calculateTheta(km, price, theta0, theta1):
-	tmp = 0
-	tmp1 = 0
-	t0 = 0
-	t1 = 0
-
-	for i,j in zip(km, price):
-		tmp = (estimatePrice(i, theta0, theta1) - j)
-		tmp1 = ((estimatePrice(i, theta0, theta1) - j) * i)
-		t0 += tmp
-		t1 += tmp1
-	t0 = learningRate * t0/len(km)
-	t1 = learningRate * t1/len(price)
-	return t0, t1
-
-def denormalizeThetas(x, y, theta0, theta1):	
-	theta0 = theta0 * (max(y) - min(y)) + min(y)
-	theta1 = (y[0] - theta0) / x[0]
-	return theta0, theta1
-
-def saveThetas(theta0, theta1):
-	f = open("thetas.txt", "w")
-	f.write(str(theta0) + "\n")
-	f.write(str(theta1))
 
 def help():
 	print("Program to train using the data in data.csv")
@@ -115,37 +32,49 @@ def setOptions():
 
 def getVisuals(km, price, theta0, theta1):
 	if km[0] <= 1.0:
-		x = np.linspace(0, 1, 11)
+		x = np.linspace(0, 1.0, 10)
+		plt.text(0.05, 0.05, "y = %.4f - %.4fx" %(theta0, theta1*-1), color='g')
+		plt.title("Normalized price vs mileage of a car")
+		plt.ylim(0)
 	else:
 		x = np.array(range(300000))
+		plt.title("Relationship between price and mileage of a car")
+		plt.text(20000, 2500, "y = %.4f - %.4fx" %(theta0, theta1*-1), color='g')
 	y = theta1 * x + theta0
-	plt.scatter(km, price)
-	plt.plot(x, y)
+	plt.scatter(km, price, label="data points")
+	plt.plot(x, y, color='g', label="linear regression on data points")
+	plt.xlabel("Mileage")
+	plt.ylabel("Price")
+	plt.legend(loc="upper right")
 	plt.show()
-
-def	processData():
-	x,y = readfile()
-	normalized = normalize(x,y)
-	km, price = splitNormalize(normalized)
-
-	calculateLearningRate(km, price)
-	theta0, theta1 = calculate(km, price)
-
-	if options == 2:
-		getVisuals(km, price, theta0, theta1)
-
-	theta0, theta1 = denormalizeThetas(x, y, theta0, theta1)
-	saveThetas(theta0, theta1)
-
-	if options == 1:
-		getVisuals(x, y, theta0, theta1)
 
 def main():
 	setOptions()
-	processData()
+
+	data = DataHandler()
+	data.readfile()
+	data.normalize()
+
+	model = LinearRegression(data.km_normalized, data.price_normalized)
+	model.calculateLearningRate()
+	model.calculate()
+
+	if options == 2:
+		getVisuals(data.km_normalized, data.price_normalized, model.theta0, model.theta1)
+	
+	model.adjustThetas(data.km, data.price)
+	model.saveThetas()
+
+	if options == 1:
+		getVisuals(data.km, data.price, model.theta0, model.theta1)
+	
+	x = np.array(range(len(model.error)))
+	plt.plot(x, model.error)
+	plt.show()
 
 if __name__ == "__main__":
 	try:
 		main()
 	except KeyboardInterrupt:
+		plt.close()
 		sys.exit(0)
