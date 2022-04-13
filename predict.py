@@ -9,7 +9,6 @@ def help():
 	print("Valid mileages are whole numbers and bigger/equal to 0\n")
 
 def getInput():
-	# print("input = " + mileage)
 	user_input = -1
 	while user_input < 0:
 		mileage = input("Enter a mileage\n")
@@ -26,10 +25,10 @@ def getThetas():
 		f = open("thetas.txt", "r")
 		theta0 = f.readline()
 		theta1 = f.readline()
+		f.close()
 	else:
 		theta0 = 0.0
 		theta1 = 0.0
-	f.close()
 	return theta0, theta1
 
 def main():

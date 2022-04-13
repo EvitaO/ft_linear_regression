@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import math
+import os.path
 
 class DataHandler:
 	def __init__(self):
@@ -9,13 +10,28 @@ class DataHandler:
 		self.km_normalized = []
 		self.price_normalized = []
 	
+	def filecheck(self):
+		if not os.path.exists("data.csv"):
+			print("data.csv file is not present in root directory")
+			exit(0)
+		if os.stat("data.csv").st_size == 0:
+			print("data.csv file is empty")
+			exit(0)
+
 	def readfile(self):
+		self.filecheck()
 		file = open("data.csv")
 		next(file)
 		for line in file:
 			data = line.split(',')
+			if len(data) != 2 or data[0] == '' or data[1] == '':
+				print("data in data.csv file has not the right format")
+				exit(0)
 			self.km.append(int(data[0]))
 			self.price.append(int(data[1]))
+		if len(self.km) <= 1 or len(self.price) <= 1:
+			print("data.csv file does not contain enough data")
+			exit(0)
 		file.close()
 	
 	def calculateNormalized(self, value, dataset):
@@ -56,6 +72,8 @@ class LinearRegression:
 			tmp0, tmp1 = self.calculateTheta()
 			self.theta0 -= tmp0
 			self.theta1 -= tmp1
+			if i > 1 and self.error[i] == self.error[i-1]:
+				break
 
 	def	calculateTheta(self):
 		tmp_theta0 = 0
