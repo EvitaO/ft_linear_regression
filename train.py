@@ -13,6 +13,7 @@ def help():
 	print("-v-normalized		to display normalized datapoints and normalized linear regresssion line in a graph")
 	print("-v			to display datapoints and linear regresssion line in a graph")
 	print("-e			to display the MSE vs iterations in a graph")
+	print("-h			prints usage info")
 
 def setOptions():
 	global options
