@@ -65,5 +65,4 @@ if __name__ == "__main__":
 	try:
 		main()
 	except KeyboardInterrupt:
-		plt.close()
 		sys.exit(0)
