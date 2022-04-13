@@ -72,7 +72,7 @@ class LinearRegression:
 			tmp0, tmp1 = self.calculateTheta()
 			self.theta0 -= tmp0
 			self.theta1 -= tmp1
-			if i > 1 and self.error[i] == self.error[i-1]:
+			if i >= 1 and self.error[i] == self.error[i-1]:
 				break
 
 	def	calculateTheta(self):
